@@ -1,6 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Address, Query, ContractFunction, AddressValue, decodeBigNumber } from '@multiversx/sdk-core';
+import {
+  Address,
+  Query,
+  ContractFunction,
+  AddressValue,
+  decodeBigNumber
+} from '@multiversx/sdk-core';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers';
 import { network } from 'config';
 import { useGlobalContext } from 'context';
@@ -10,9 +16,6 @@ const PEERME_ENTITY_ADDRESS = 'erd1qqqqqqqqqqqqqpgq7khr5sqd4cnjh5j5dz0atfz03r3l9
 
 const APRmin = 1.11;
 const APRmax = 3;
-
-// Use a constant COLS price (in USD)
-const COLS_PRICE_USD = 0.12;
 
 // --- CONSTANT BASE APR ---
 const BASE_APR_INPUT = 7.09;
@@ -32,11 +35,30 @@ export interface ColsStakerRow {
   rank: number | null;
 }
 
+// Fetch latest COLS price from MultiversX API
+async function fetchColsPriceFromApi() {
+  try {
+    const { data } = await axios.get(
+      'https://api.multiversx.com/mex/tokens/prices/daily/COLS-9d91b7'
+    );
+    if (Array.isArray(data) && data.length > 0) {
+      const last = data[data.length - 1];
+      if (last && typeof last.value === 'number') {
+        // Round to 3 decimal places
+        return Math.round(last.value * 1000) / 1000;
+      }
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function useColsApr({ trigger }: { trigger: any }) {
   const [loading, setLoading] = useState(true);
   const [stakers, setStakers] = useState<ColsStakerRow[]>([]);
   const [egldPrice, setEgldPrice] = useState<number>(0);
-  const [colsPrice] = useState<number>(COLS_PRICE_USD);
+  const [colsPrice, setColsPrice] = useState<number>(0);
   const [baseApr, setBaseApr] = useState<number>(BASE_APR_INPUT);
 
   // Get agency service fee from global context
@@ -104,10 +126,15 @@ export function useColsApr({ trigger }: { trigger: any }) {
     // 3. Prices
     const egldPrice = await fetchEgldPrice();
     setEgldPrice(egldPrice);
-    // 4. Use constant base APR
+
+    // 4. Fetch COLS price from MultiversX API
+    const fetchedColsPrice = await fetchColsPriceFromApi();
+    setColsPrice(fetchedColsPrice);
+
+    // 5. Use constant base APR
     setBaseApr(BASE_APR_INPUT);
 
-    // 5. Parse agency service fee (e.g. "10%" -> 0.1)
+    // 6. Parse agency service fee (e.g. "10%" -> 0.1)
     let agencyServiceFee = 0.1; // fallback
     if (
       contractDetails &&
@@ -121,7 +148,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
       }
     }
 
-    // 6. Build table
+    // 7. Build table
     const table: ColsStakerRow[] = colsStakers.map(s => ({
       address: s.address,
       colsStaked: s.colsStaked,
@@ -134,18 +161,18 @@ export function useColsApr({ trigger }: { trigger: any }) {
       rank: null
     }));
 
-    // 7. Calculate ratios
+    // 8. Calculate ratios
     for (const row of table) {
-      if (row.egldStaked > 0) {
-        row.ratio = (row.colsStaked * COLS_PRICE_USD) / (row.egldStaked * egldPrice);
+      if (row.egldStaked > 0 && fetchedColsPrice > 0 && egldPrice > 0) {
+        row.ratio = (row.colsStaked * fetchedColsPrice) / (row.egldStaked * egldPrice);
       } else {
         row.ratio = null;
       }
     }
-    // 8. Normalize
+    // 9. Normalize
     const validRatios = table.filter(r => r.ratio !== null).map(r => r.ratio!);
-    const minRatio = Math.min(...validRatios);
-    const maxRatio = Math.max(...validRatios);
+    const minRatio = validRatios.length > 0 ? Math.min(...validRatios) : 0;
+    const maxRatio = validRatios.length > 0 ? Math.max(...validRatios) : 0;
     for (const row of table) {
       if (row.ratio !== null && maxRatio !== minRatio) {
         row.normalized = (row.ratio - minRatio) / (maxRatio - minRatio);
@@ -153,7 +180,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.normalized = null;
       }
     }
-    // 9. APR(i)
+    // 10. APR(i)
     for (const row of table) {
       if (row.normalized !== null) {
         row.aprBonus = APRmin + (APRmax - APRmin) * Math.sqrt(row.normalized);
@@ -161,7 +188,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.aprBonus = null;
       }
     }
-    // 10. DAO(i) - Only for users with active eGLD staked
+    // 11. DAO(i) - Only for users with active eGLD staked
     const totalEgldStaked = table.reduce((sum, r) => sum + (r.egldStaked || 0), 0);
     const sumColsStaked = table.reduce((sum, r) => sum + (r.colsStaked || 0), 0);
     for (const row of table) {
@@ -182,7 +209,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.dao = null;
       }
     }
-    // 11. APR_TOTAL: Only for users with active eGLD staked, otherwise just base APR
+    // 12. APR_TOTAL: Only for users with active eGLD staked, otherwise just base APR
     for (const row of table) {
       if (row.egldStaked > 0) {
         row.aprTotal = BASE_APR_INPUT + (row.aprBonus || 0) + (row.dao || 0);
@@ -190,7 +217,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.aprTotal = BASE_APR_INPUT;
       }
     }
-    // 12. Ranking
+    // 13. Ranking
     const sorted = [...table].sort((a, b) => (b.aprTotal || 0) - (a.aprTotal || 0));
     for (let i = 0; i < sorted.length; ++i) {
       sorted[i].rank = i + 1;
