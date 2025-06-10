@@ -34,7 +34,7 @@ export function ColsAprTable() {
     return <div>No eligible data for COLS-DIST table.</div>;
   }
 
-  // Render as a copy-paste ready table (plain text, tab-separated, no header)
+  // Render as a copy-paste ready table (plain text, semicolon-separated, no header)
   return (
     <div style={{ margin: 16 }}>
       <h3>COLS-DIST Table</h3>
@@ -47,7 +47,7 @@ export function ColsAprTable() {
         userSelect: 'all'
       }}>
 {rows.map((r: { address: string; colsDist: number }) =>
-  `${r.address}\t${r.colsDist.toLocaleString(undefined, { maximumFractionDigits: 8 })}`
+  `${r.address};${r.colsDist.toLocaleString(undefined, { maximumFractionDigits: 8 })}`
 ).join('\n')}
       </pre>
       <div style={{ marginTop: 12, fontSize: 13 }}>
