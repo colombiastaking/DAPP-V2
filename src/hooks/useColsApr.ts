@@ -17,9 +17,8 @@ const PEERME_ENTITY_ADDRESS = 'erd1qqqqqqqqqqqqqpgq7khr5sqd4cnjh5j5dz0atfz03r3l9
 const APRmin = 1.11;
 const APRmax = 3;
 
-// --- CONSTANT BASE APR ---
-const BASE_APR_INPUT = 7.09;
-const RAW_APR = 7.09; // Raw APR before service fee
+// --- CONSTANTS ---
+const RAW_APR = 7.09; // Raw APR before service fee (used for DAO bonus, not base APR)
 const AGENCY_BUYBACK = 0.3; // Agency buyback percentage
 const DAO_DISTRIBUTION_RATIO = 0.333; // Portion of buybacks distributed to DAO
 
@@ -54,12 +53,27 @@ async function fetchColsPriceFromApi() {
   }
 }
 
+// Fetch base APR from MultiversX API for the staking contract
+async function fetchBaseAprFromApi() {
+  try {
+    const { data } = await axios.get(
+      `https://api.multiversx.com/providers/${network.delegationContract}`
+    );
+    if (data && typeof data.apr === 'number') {
+      return data.apr;
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function useColsApr({ trigger }: { trigger: any }) {
   const [loading, setLoading] = useState(true);
   const [stakers, setStakers] = useState<ColsStakerRow[]>([]);
   const [egldPrice, setEgldPrice] = useState<number>(0);
   const [colsPrice, setColsPrice] = useState<number>(0);
-  const [baseApr, setBaseApr] = useState<number>(BASE_APR_INPUT);
+  const [baseApr, setBaseApr] = useState<number>(0);
 
   // Get agency service fee from global context
   const { contractDetails } = useGlobalContext();
@@ -131,8 +145,9 @@ export function useColsApr({ trigger }: { trigger: any }) {
     const fetchedColsPrice = await fetchColsPriceFromApi();
     setColsPrice(fetchedColsPrice);
 
-    // 5. Use constant base APR
-    setBaseApr(BASE_APR_INPUT);
+    // 5. Fetch base APR from MultiversX API
+    const fetchedBaseApr = await fetchBaseAprFromApi();
+    setBaseApr(fetchedBaseApr);
 
     // 6. Parse agency service fee (e.g. "10%" -> 0.1)
     let agencyServiceFee = 0.1; // fallback
@@ -212,9 +227,9 @@ export function useColsApr({ trigger }: { trigger: any }) {
     // 12. APR_TOTAL: Only for users with active eGLD staked, otherwise just base APR
     for (const row of table) {
       if (row.egldStaked > 0) {
-        row.aprTotal = BASE_APR_INPUT + (row.aprBonus || 0) + (row.dao || 0);
+        row.aprTotal = fetchedBaseApr + (row.aprBonus || 0) + (row.dao || 0);
       } else {
-        row.aprTotal = BASE_APR_INPUT;
+        row.aprTotal = fetchedBaseApr;
       }
     }
     // 13. Ranking
