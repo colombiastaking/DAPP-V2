@@ -1,45 +1,57 @@
 import { useColsAprContext } from '../../context/ColsAprContext';
+import { useGetAccountInfo } from '@multiversx/sdk-dapp/hooks/account/useGetAccountInfo';
 import type { ColsStakerRow } from '../../hooks/useColsApr';
 
-export function ColsAprTable() {
-  const { loading, stakers, egldPrice, colsPrice, baseApr } = useColsAprContext();
+const TARGET_USER = 'erd1kr7m0ge40v6zj6yr8e2eupkeudfsnv827e7ta6w550e9rnhmdv6sfr8qdm';
 
-  if (loading) return <div>Loading COLS APR table...</div>;
+export function ColsAprTable() {
+  const { address } = useGetAccountInfo();
+  const { loading, stakers, egldPrice, colsPrice } = useColsAprContext();
+
+  // Only show table if the logged-in user is the target user
+  if (address !== TARGET_USER) return null;
+  if (loading) return <div>Loading COLS-DIST table...</div>;
+
+  // Include all addresses with COLS staked and eGLD delegated
+  const filtered = stakers.filter(
+    (row: ColsStakerRow) => row.colsStaked > 0 && row.egldStaked > 0
+  );
+
+  // Calculate COLS-DIST(i) for each eligible user
+  const rows = filtered.map((row: ColsStakerRow) => {
+    // COLS-DIST(i) = APR-BONUS(i)/100 * eGLD-staked(i) * eGLDprice / 365 / COLSprice
+    const colsDist =
+      row.aprBonus && row.egldStaked && egldPrice && colsPrice
+        ? (row.aprBonus / 100) * row.egldStaked * egldPrice / 365 / colsPrice
+        : 0;
+    return {
+      address: row.address,
+      colsDist
+    };
+  });
+
+  if (rows.length === 0) {
+    return <div>No eligible data for COLS-DIST table.</div>;
+  }
+
+  // Render as a copy-paste ready table (plain text, tab-separated, no header)
   return (
-    <div style={{ overflowX: 'auto', margin: 16 }}>
-      <h3>COLS Stakers APR Table</h3>
-      <table style={{ minWidth: 900, background: '#222', color: '#fff', borderRadius: 8 }}>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Address</th>
-            <th>COLS Staked</th>
-            <th>eGLD Staked</th>
-            <th>Ratio</th>
-            <th>Normalized</th>
-            <th>APR Bonus</th>
-            <th>DAO</th>
-            <th>APR TOTAL</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stakers.map((row: ColsStakerRow) => (
-            <tr key={row.address}>
-              <td>{row.rank}</td>
-              <td style={{ fontFamily: 'monospace', fontSize: 13 }}>{row.address}</td>
-              <td>{row.colsStaked.toLocaleString(undefined, { maximumFractionDigits: 4 })}</td>
-              <td>{row.egldStaked.toLocaleString(undefined, { maximumFractionDigits: 4 })}</td>
-              <td>{row.ratio !== null ? row.ratio.toFixed(4) : '-'}</td>
-              <td>{row.normalized !== null ? row.normalized.toFixed(4) : '-'}</td>
-              <td>{row.aprBonus !== null ? row.aprBonus.toFixed(4) : '-'}</td>
-              <td>{row.dao !== null ? row.dao.toFixed(4) : '-'}</td>
-              <td>{row.aprTotal !== null ? row.aprTotal.toFixed(4) : '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div style={{ margin: 16 }}>
+      <h3>COLS-DIST Table</h3>
+      <pre style={{
+        background: '#222',
+        color: '#fff',
+        padding: 16,
+        borderRadius: 8,
+        fontSize: 16,
+        userSelect: 'all'
+      }}>
+{rows.map((r: { address: string; colsDist: number }) =>
+  `${r.address}\t${r.colsDist.toLocaleString(undefined, { maximumFractionDigits: 8 })}`
+).join('\n')}
+      </pre>
       <div style={{ marginTop: 12, fontSize: 13 }}>
-        <b>eGLD Price:</b> ${egldPrice} &nbsp; <b>COLS Price:</b> ${colsPrice} &nbsp; <b>Base APR:</b> {baseApr}%
+        <b>eGLD Price:</b> ${egldPrice} &nbsp; <b>COLS Price:</b> ${colsPrice}
       </div>
     </div>
   );
