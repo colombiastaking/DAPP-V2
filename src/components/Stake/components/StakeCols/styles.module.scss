@@ -1,0 +1,10 @@
+@import '../Delegate/styles.module.scss';
+
+.fireButton {
+  background: #ff9800 !important;
+  color: #fff !important;
+  font-weight: 700;
+  border: 2px solid #ff9800;
+  box-shadow: 0 0 8px #ff9800;
+  transition: box-shadow 0.2s;
+}

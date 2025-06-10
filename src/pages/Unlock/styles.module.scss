@@ -1,0 +1,283 @@
+.unlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 992px) {
+    height: 100vh;
+  }
+
+  .wrapper {
+    background: rgba(0, 6, 13, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 100px 30px 30px;
+    padding: 30px;
+    text-align: center;
+
+    @media (min-width: 992px) {
+      padding: 0 60px 60px;
+    }
+
+    .logo {
+      background: #303234;
+      border: 1px solid #49494d;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+      border-radius: 50%;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+      width: 100px;
+      height: 100px;
+      position: relative;
+      margin: -50px 0 30px;
+
+      svg {
+        width: 32px;
+        height: auto;
+      }
+    }
+
+    .heading {
+      line-height: 1;
+      color: white;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .description {
+      line-height: 1;
+      font-size: 18px;
+      color: #808ea3;
+    }
+
+    .connects {
+      display: flex;
+      margin-top: 45px;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      button,
+      a {
+        border: none;
+        background: none;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex;
+        align-items: stretch;
+        text-decoration: none;
+
+        &:focus,
+        &:active:focus {
+          background: none;
+          outline: none;
+          border: none;
+          box-shadow: none;
+        }
+      }
+
+      .connect {
+        cursor: pointer;
+        background: rgba(36, 37, 38, 0.5);
+        border: 1px solid #49494d;
+        box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.12);
+        border-radius: 12px;
+        width: 160px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin: 0 0.5rem 1rem;
+        transition: all 200ms ease-in;
+
+        &:hover {
+          background: #303234;
+        }
+
+        .title {
+          color: rgba(#808ea3, 0.9);
+          margin-bottom: 15px;
+          font-size: 12px;
+          line-height: 1;
+        }
+
+        .icon {
+          border-radius: 16px;
+          width: 60px;
+          height: 60px;
+          margin-bottom: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          svg {
+            max-width: 30px;
+            max-height: 30px;
+          }
+        }
+
+        .name {
+          color: #f8f8ff;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+.qr {
+  border-radius: 12px;
+  padding: 30px;
+  background: rgba(36, 37, 38, 1);
+  position: relative;
+
+  .close {
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: calc(100% + 5px);
+    border-radius: 50%;
+    background: rgba(36, 37, 38, 1);
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 15px;
+      height: 15px;
+
+      path {
+        fill: white;
+      }
+    }
+  }
+
+  .code {
+    margin-bottom: 30px;
+
+    svg {
+      border-radius: 12px;
+    }
+  }
+
+  .subheading {
+    line-height: 1;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+  }
+}
+
+[class*='dapp-extension-modal'] {
+  color: #fff;
+
+  button {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    margin: 32px auto 0;
+    padding: 15px 30px;
+    width: 150px;
+    border-radius: 7px;
+    color: white;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+  }
+}
+
+[class*='dapp-ledger-modal'] *,
+[class*='dapp-wallet-connect-modal'] * {
+  color: #a3a3a3;
+}
+
+[class*='dapp-core-component__dappModalStyles__dappModalContent'] {
+  background-color: black;
+  border-radius: 24px;
+  border: 1px solid rgba(white, 0.125) !important;
+}
+
+[class*='modal-close-button'] {
+  background: none !important;
+  border: none;
+  color: #a3a3a3;
+
+  &:hover {
+    color: #a3a3a3;
+  }
+}
+
+.title {
+  color: #d4d4d4;
+}
+
+.subtitle,
+.description {
+  color: #a3a3a3 !important;
+}
+
+.head {
+  background-color: #a3a3a3 !important;
+}
+
+.navigation,
+.footer {
+  color: #a3a3a3 !important;
+}
+
+.selected {
+  color: #a3a3a3;
+
+  input:before {
+    border: 2px solid #adb5bd !important;
+    background-color: #adb5bd;
+  }
+}
+
+.icon svg path {
+  fill: #a3a3a3;
+}
+
+.phishing {
+  color: #a3a3a3;
+
+  svg,
+  strong {
+    color: #1b46c2 !important;
+  }
+}
+
+.button {
+  background-color: #1b46c2 !important;
+  border-color: #1b46c2 !important;
+  color: #000 !important;
+
+  svg path {
+    fill: #000 !important;
+  }
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: #1b46c2 !important;
+    border-color: #1b46c2 !important;
+    color: #000 !important;
+
+    svg path {
+      fill: #000 !important;
+    }
+  }
+}
+
+.lead {
+  color: #a3a3a3;
+}
+
+.pairing {
+  background-color: #d4d4d4 !important;
+}

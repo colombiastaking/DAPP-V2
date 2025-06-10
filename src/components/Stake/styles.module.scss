@@ -1,0 +1,280 @@
+.stake {
+  margin-top: 60px;
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  &.empty {
+    margin-top: 60px;
+    padding-bottom: 90px;
+  }
+
+  .assetsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 32px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .assetsBox {
+    background: rgba(36, 37, 38, 0.5);
+    border: 2px solid #49494d;
+    border-radius: 12px;
+    padding: 24px 32px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 6px 24px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+    flex: 1 1 220px;
+    max-width: 350px;
+  }
+
+  .icon {
+    background: black;
+    border: 1px solid #49494d;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+    border-radius: 50%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    position: relative;
+    margin-bottom: 12px;
+
+    & > svg {
+      width: 24px;
+      height: auto;
+    }
+  }
+
+  .subicon {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    bottom: 0;
+    right: 0;
+
+    svg path {
+      fill: white;
+    }
+  }
+
+  .title {
+    color: #808ea3;
+    font-size: 18px;
+    margin-bottom: 10px;
+    line-height: 1;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .activeAmountsRow {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 18px;
+    justify-content: center;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .activeAmount {
+    color: white;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .activeLabel {
+    color: #ff9800;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 2px;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+  }
+
+  .actionsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .actionButtonWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+    .heading {
+      font-size: 32px;
+      line-height: 1;
+      color: white;
+      margin-bottom: 45px;
+    }
+
+    .message {
+      color: #808ea3;
+      line-height: 1;
+      font-size: 18px;
+      margin: 30px 0;
+    }
+  }
+
+  .value {
+    color: white;
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 30px;
+
+    @media (min-width: 576px) {
+      font-size: 32px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    flex-direction: column;
+
+    @media (min-width: 576px) {
+      align-items: center;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .action {
+      justify-content: center;
+      display: flex;
+      align-items: center;
+      padding: 15px 30px;
+      border-radius: 7px;
+      color: white;
+      border: none;
+      font-size: 14px;
+
+      @media (min-width: 576px) {
+        width: 150px;
+      }
+
+      &.disabled {
+        pointer-events: none;
+        color: rgba(white, 0.5);
+        background-color: #303234 !important;
+      }
+
+      &:not(:last-child) {
+        margin-bottom: 10px;
+
+        @media (min-width: 576px) {
+          margin-bottom: 0;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+
+  .aprInfo {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+  }
+
+  .aprValue {
+    margin-left: 8px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  /* --- Responsive Claimable Rewards Panel --- */
+  .panel {
+    margin-top: 32px;
+    background: rgba(36, 37, 38, 0.5);
+    border: 2px solid #49494d;
+    border-radius: 12px;
+    padding: 32px 24px 24px 24px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .icon {
+      margin: 0 auto 12px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      left: 0;
+      right: 0;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #808ea3;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .value {
+      color: white;
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+
+      @media (min-width: 576px) {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+      }
+    }
+  }
+}

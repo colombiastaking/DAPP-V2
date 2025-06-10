@@ -1,0 +1,87 @@
+.heading {
+  margin-bottom: 45px;
+
+  @media (min-width: 992px) {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .meta {
+    margin-bottom: 30px;
+    width: 100%;
+
+    .icon {
+      svg path {
+        fill: #808ea3;
+      }
+    }
+  }
+
+  .label {
+    line-height: 1;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+    color: #9ba5b4;
+  }
+
+  .contract {
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 1;
+    color: white;
+    margin-right: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (min-width: 768px) {
+      margin-right: 15px;
+    }
+  }
+
+  .button {
+    width: calc((100vw - 70px) / 2);
+    max-width: 130px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    background-color: rgba(white, 0.1);
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: white;
+    border: none;
+
+    &:last-child {
+      margin-left: 10px;
+    }
+
+    &.disabled {
+      pointer-events: none;
+      color: rgba(white, 0.5);
+      background-color: #303234 !important;
+
+      svg path {
+        fill: rgba(white, 0.5);
+      }
+    }
+
+    @media (min-width: 992px) {
+      width: auto;
+    }
+
+    @media (min-width: 1200px) {
+      width: 130px;
+    }
+
+    .icon {
+      margin-right: 8px;
+    }
+
+    svg path {
+      fill: white;
+    }
+  }
+}

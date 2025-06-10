@@ -1,0 +1,102 @@
+/**
+ * This file is the single source of truth for COLS staker APRs.
+ * - The first entry is the base APR (applies to all non-COLS stakers).
+ * - All other entries are { address, apr } objects.
+ * - To update: just edit this file.
+ */
+export interface ColsAprEntry {
+  address: string;
+  apr: number;
+}
+
+export interface ColsAprTable {
+  baseApr: number;
+  stakers: ColsAprEntry[];
+}
+
+// Paste your table here (first line is base APR, rest are address+APR)
+const raw = `
+global	7.056
+erd1uw9muhnne0dddq5rvgsle9lwcxy78fjd0gjplfgu0x4jfukakcxq6lvptj	8.41953807975646
+erd1z4fhhvq0eclmwc23atj6r8t8588pyst8jcsds35ljd3hv6xk58cqhyvw0f	8.57156908021858
+erd1nppsr879sjxn6nrskvyv8xph04pwask5w54krd7ylzguhzfs7t9q3ycevn	8.43757627191194
+erd1mvtq3rcsh63x8rdu5hwwlmczrcmmcuudhf828qxs6edeer08asgqzadv72	8.66366612369349
+erd1h3wljh76apk6sese8n7kxxt6v3kprs5lch2rd00gnvsaqtnlpwuqyxe0np	8.64967662288004
+erd12yjauv9exfyjqdayx4ezy3allur3vsf8kapahcaxkf5c5vvv54gqzvgag8	8.50795066793559
+erd1zyukkr4qt92rprtjkh2k3kany6dnqf30msxu9gw20rlx2v7mqd8sqp88nz	7.056
+erd1kndgs4ydza9qz3ykkz0tdqs2aafl830tyyl27z8ewcgvhjg2ms7qkldrxr	8.62776120970335
+erd1k5uaadyg2dscxer6d63dwzqhrrw9gddve6eg2aaec35x6afdl97s6evfk7	15.0746308865021
+erd1qawdjav5x56sjm4uwrq50xewq7rypezntdyg0k6udxy935zctwdqwk6862	8.56962839677566
+erd1770jpvxsdctegqf45gzct0vljlxezu4jmdsjr922afxdkhrz25gqv9qcsw	8.6045908138876
+erd14z2t2adpdd67yrxsfr078qptfn7t9gxdewvh45gejeeehyd22fds7t6uvn	8.51893619247032
+erd158l6z4vnwjxkkvlssjys25akjps034asutqxp43tn6x2n4wvgwlqen0fv7	8.55029343094391
+erd163lr2galxwzjhwj6hhtthqqs3w2jvdvqvpcps3ztw6cwf582k00qh77c4q	8.42003355969135
+erd17mmlrnt67cfdd9tskdn5wjw06a9a8h2w3cuecvvmh2hr787hk8esdv3alk	8.71219491402274
+erd1rg6rtlxhfykkgd2jpuvnr6j9q20cuk7any4kgzrvjnaa5jk5k0dsf6004c	8.60750524647222
+erd1zc6a2zl84qdklvyqydfjpm2uxjz3230zg02kne0mtvp27rfxruls0ufazw	8.78307143216927
+erd1x64qucsyarq3wgu60aw8ckj7ad6dw60me0du7a239p9yerh9w2xst3vfs5	8.51563400729915
+erd1vt2thtexcm6c0e6a3kyyanl6hf9p8jqfazafa3rghva0ymtv2t0smjgdaj	8.47599168183685
+erd13q7ftx83ktlrms79k4xl4w9a7y7xazr54j3qd79uj4j8cxdar5mqhkd73t	9.58696893031491
+erd1u0wyar22pgude0gn7ajw5n5c6su7k5dgyz5l3ardy63c5y7wqmnqt7luq0	8.41041522387617
+erd15msctu035g0q60t5jeu68myx5m9f2tnw8ksvc3225d09dj4ztslqwxeava	8.50229960452799
+erd1y8mqzejm90vvlz38zshjz8ss8334tuup2h86a5h0fleqtydm06es9xs6m5	8.52073044980125
+erd14r2erzddu8nz0qg2v8ng5cu5gvh9uw3s2p2kvnkgahfp2fr5ag4srr38dr	8.49826874443471
+erd1hcrl2y4hkh8w6c5yxhjj60qvsd57hnvvan3e90ldnjq674fkhdwsltgjh5	7.056
+erd1ly2ztms3f0dr90z32cwzzhxgdfzjg9k5g3m3yzt4mvmt6aegxrdsa7rru3	8.64189426252464
+erd1hu96s6qc7rutf7t4cmygxam8lazu4a5fkkzgqdxpuh30yz0jgrks3sj37j	8.49561612400246
+erd1xhg2fwxvg96ntjqlr233scfrwcgmrqsd7l8u3maymke5dectkn7slsmkw3	8.6032250062302
+erd1zehu4eyfz88xdl033czqqycyd3ruz2z3xg3xh8jqqyhqmyptzjqs3qtny9	8.57153672160077
+erd1ww7wmxvae5nqetcc0u6774n64zugdnjhte365qxm456w9r6rs5nsg9ywdu	8.50254223382292
+erd1lv48p9j6knnq7xdjpg0gn0nq7g4t6rfyc0gy398re4lxx3chgprsx5hmfu	7.056
+erd1jr7q42kesm5l55wd0svx89v9lfxudk5tr0w369pevwm8pewjqdaqkt4eg8	8.44709224626358
+erd1mmh2j5y8esv2tmmyeau3hr4xa2u2te3zc3j9wumn3v5vm8uvsczqnucj5l	8.89840094827953
+erd17kwxywvh9pgepa9rwmgc78amwdzlnru4ccrv0v664hvnxmxf8t9s9573uz	7.056
+erd12m3nv6elp4dh8fz85krjufyzl453s5zcrqddunrweh409awaj5psayphc0	8.90120967032549
+erd1t4awq5fpnwrp3kzjzpjzvk70w6vn3h7ycp62sydvekwn82fqyfnq0uv88j	8.82744249605819
+erd1hsu4fvht9j2hhtkfnkea2uwuk8l68hmg0mpzees0uhkhhdmrlv6sfa2v6y	8.56849900598224
+erd1ju5fxhtdmzyr83wjdhuhyht2w0qlgufvewk6kdew5kg6a8wezdgsnnd2ln	8.57466527471554
+erd15mlkhu0rl0pqnd39f4v0a63n744algncel5cd7z45wl2ufw8lcjsedewyz	7.056
+erd10f47kgrsdxvkqntenmddlc6q8t53yfnm33nnuqdxd3um974pcgqqse6v28	8.45555504793869
+erd1gep2dcnsjauth8gkxayfflz4h637qtpz69mnxeeavngerl8hvxuqn54lyj	8.66257366847815
+erd1t853la5m60h5tyg3hf7cf6q5440kdvc0qhr9q59gjcwgh4fp3kns5c8tk0	8.69785156663584
+erd1rvgyurgaa3pvv8zug8dwzxfpp86kgvz3gygfnp0skfmcgr02cfnq5yyhu8	8.5516393053922
+erd1lhzsy4evp0x8998073jj0fh5cztel58crpykwpfhf40cqq7rnpfszx6jlq	8.68526091038436
+erd14ztdjd5a3gyn7f5l0jn6m2yuqsxlkr8w4z0jrfjtcygjm2k8w9wsec8xcs	8.58466965868153
+erd1xy0x0kc98y0mhd338t23hfy47fqfkzeg3v5km5cqsx5c2en8ql2qf5c5xz	10.5557582143034
+erd134ljhgasqxnej06xl82v538aa6tk58kkwj9vsrwnxghrvyjwup3qad4fxx	8.45035769917771
+erd1uhuz6rx524yk4wamn5zyn89x6mpfttmj0xmk6c3uvphz2mev84ssthfxj	8.6441459646401
+erd1d8qcftee9a4r4ttvcpdn2rwammc28pe6knte5580tckcn8dhayfsgl2mf8	8.41150789374198
+erd14xxf8lrf5xv86xu2t2vzh56uc2rl4lj047duyya4jayvvhey70kquq5smm	8.439358838824
+erd1yw4wnufuq20lwu3uule7ftcjdvvt7sw6547fuf858kp33667muuswa5gem	8.79351940786691
+erd1wv3p4n7k8sdnlddfmv86ekff8e9keh2ekap84sza5y8h33mgdumqhduc6x	8.65471393111346
+erd1r57nmcgqywylaqfmttu9v0uup4766psugrsgy3twtqpyre3ftcgqy46def	8.53536497453721
+erd1ca4k29844nqrk2pa5wt4ly92anymae4elz83z5hsn27wrecqzunqa6p4sc	7.056
+erd1cyyshs2udk06sx6k62c0ye8tmhx3w7u3aukdr6phsrwhzg0h8wuq3w72ts	8.63051175255875
+erd1asqstw683ffsse0qmqyf9fefjgerpksjhxv4cgwpmth4a53dqseqkdgezz	8.74290219309398
+erd1q33qx6e0n7whmh42yxekekm4ep8l86tcymtjunf8uxwpp64wwhlqqercd9	7.056
+erd12du8h5q3ccgla8gxn9uqx2ycpfelphvmekxzrrkrpnzvmutj8mrsd0tafq	8.52545476459496
+erd1hx4gqgdyksxpc3calwy69vhfnlyr6fefvvc542aff53a6q7gea8sr222ck	8.52521136726157
+erd1trvrd2wlmqcjx0gum3vts9nuas0n2u82kq35jycfa87wnaes0hus0r8y2a	8.66830840854415
+erd1ug4zrpflclqeryzx7sg3de9petgc9mzucxgm9en05duwvqt60yhs48xgh4	9.77223794189855
+erd1r0ae7tqh78cwlneh2dzgdqextng9tpwvchrdu0edp234zemkgq8svf5hfh	11.0417910958318
+erd1kr7m0ge40v6zj6yr8e2eupkeudfsnv827e7ta6w550e9rnhmdv6sfr8qdm	10.2677013139045
+`;
+
+function parseAprTable(raw: string): ColsAprTable {
+  const lines = raw.trim().split('\n');
+  let baseApr = 0;
+  const stakers: ColsAprEntry[] = [];
+  for (const line of lines) {
+    const [addr, aprStr] = line.trim().split(/\s+|,|\t/).filter(Boolean);
+    if (addr === 'global') {
+      baseApr = parseFloat(aprStr.replace(/,/g, '.'));
+    } else if (addr.startsWith('erd1')) {
+      stakers.push({ address: addr, apr: parseFloat(aprStr.replace(/,/g, '.')) });
+    }
+  }
+  // Sort stakers by APR descending for ranking
+  stakers.sort((a, b) => b.apr - a.apr);
+  return { baseApr, stakers };
+}
+
+export const colsAprTable: ColsAprTable = parseAprTable(raw);
