@@ -17,7 +17,7 @@ import { StakeCols } from './components/StakeCols';
 import { WithdrawCols } from './components/WithdrawCols';
 
 import useStakeData from './hooks';
-import { colsAprTable } from 'helpers/colsAprTable';
+import { useColsAprContext } from '../../context/ColsAprContext';
 
 import styles from './styles.module.scss';
 
@@ -39,8 +39,6 @@ function denominateCols(raw: string, addCommas = true) {
   }
   return result;
 }
-
-// --- Removed unused fetchClaimableCols function ---
 
 const ClaimCols = ({
   onClaimed
@@ -123,44 +121,26 @@ export const Stake = () => {
   const isEmpty =
     userActiveStake.data === '0' && userClaimableRewards.data === '0';
 
-  // --- COLS claimable logic (no longer shown in UI) ---
-  // const [claimableCols, setClaimableCols] = useState<string>('0');
-  // const [colsLoading, setColsLoading] = useState<boolean>(true);
-
-  // const reloadClaimableCols = async () => {
-  //   if (address) {
-  //     setColsLoading(true);
-  //     const amt = await fetchClaimableCols(address);
-  //     setClaimableCols(amt);
-  //     setColsLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   reloadClaimableCols();
-  //   // eslint-disable-next-line
-  // }, [address]);
-
-  // --- Manual APR Table Logic ---
+  // --- Use live COLS APR data for user APR/ranking ---
+  const { loading: aprLoading, stakers, baseApr } = useColsAprContext();
   const [userApr, setUserApr] = useState<number | null>(null);
   const [userRank, setUserRank] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!address) {
+    if (!address || !Array.isArray(stakers) || stakers.length === 0) {
       setUserApr(null);
       setUserRank(null);
       return;
     }
-    const stakers = colsAprTable.stakers;
     const idx = stakers.findIndex((s) => s.address === address);
     if (idx === -1) {
       setUserApr(null);
       setUserRank(null);
     } else {
-      setUserApr(stakers[idx].apr);
-      setUserRank(idx + 1);
+      setUserApr(stakers[idx].aprTotal ?? null);
+      setUserRank(stakers[idx].rank ?? null);
     }
-  }, [address]);
+  }, [address, stakers]);
 
   // Panels and UI
   return (
@@ -247,7 +227,9 @@ export const Stake = () => {
             <div className={styles.aprInfo}>
               <div>
                 <b>Base APR:</b>
-                <span className={styles.aprValue} style={{ color: '#000', background: 'none' }}>{Number(colsAprTable.baseApr).toFixed(2)}%</span>
+                <span className={styles.aprValue} style={{ color: '#000', background: 'none' }}>
+                  {aprLoading ? '...' : Number(baseApr).toFixed(2)}%
+                </span>
               </div>
               <div>
                 <b>Total APR with Bonus:</b>
@@ -269,9 +251,11 @@ export const Stake = () => {
                     letterSpacing: 0.5,
                     display: 'inline-block'
                   }}>
-                    {userApr !== null
-                      ? Number(userApr).toFixed(2)
-                      : Number(colsAprTable.baseApr).toFixed(2)
+                    {aprLoading
+                      ? '...'
+                      : userApr !== null
+                        ? Number(userApr).toFixed(2)
+                        : Number(baseApr).toFixed(2)
                     }%
                   </span>
                 </span>
@@ -279,9 +263,11 @@ export const Stake = () => {
               <div>
                 <b>Your Ranking:</b>
                 <span className={styles.aprValue} style={{ color: '#000', background: 'none' }}>
-                  {userRank !== null
-                    ? `#${userRank} of ${colsAprTable.stakers.length} COLS stakers`
-                    : 'N/A'}
+                  {aprLoading
+                    ? '...'
+                    : userRank !== null
+                      ? `#${userRank} of ${stakers.length} COLS stakers`
+                      : 'N/A'}
                 </span>
               </div>
             </div>
@@ -298,7 +284,6 @@ export const Stake = () => {
             </div>
           </div>
           <div className={styles.title}>Claim Rewards</div>
-          {/* Removed eGLD claimable rewards balance display */}
           <div className={styles.actions}>
             <button
               type="button"
@@ -332,7 +317,6 @@ export const Stake = () => {
             >
               Redelegate eGLD
             </button>
-            {/* Always show COLS claim button, always enabled */}
             <ClaimCols onClaimed={() => {}} />
           </div>
         </div>

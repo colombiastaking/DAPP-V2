@@ -5,14 +5,14 @@ const ColsAprContext = createContext<any>(null);
 
 export function ColsAprProvider({ children }: { children: any }) {
   const [trigger, setTrigger] = useState(0);
-  const { loading, stakers, egldPrice, colsPrice, baseApr, serviceFee } = useColsApr({ trigger });
+  const { loading, stakers, egldPrice, colsPrice, baseApr } = useColsApr({ trigger });
 
   // Call this after user action to force recalc
   const refresh = useCallback(() => setTrigger(t => t + 1), []);
 
   return (
     <ColsAprContext.Provider value={{
-      loading, stakers, egldPrice, colsPrice, baseApr, serviceFee, refresh
+      loading, stakers, egldPrice, colsPrice, baseApr, refresh
     }}>
       {children}
     </ColsAprContext.Provider>
