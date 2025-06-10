@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Address, Query, ContractFunction, AddressValue, decodeBigNumber } from '@multiversx/sdk-core';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers';
 import { network } from 'config';
+import { useGlobalContext } from 'context';
 
 const PEERME_COLS_CONTRACT = 'erd1qqqqqqqqqqqqqpgqjhn0rrta3hceyguqlmkqgklxc0eh0r5rl3tsv6a9k0';
 const PEERME_ENTITY_ADDRESS = 'erd1qqqqqqqqqqqqqpgq7khr5sqd4cnjh5j5dz0atfz03r3l99y727rsulfjj0';
@@ -17,6 +18,7 @@ const COLS_PRICE_USD = 0.12;
 const BASE_APR_INPUT = 7.09;
 const RAW_APR = 7.09; // Raw APR before service fee
 const AGENCY_BUYBACK = 0.3; // Agency buyback percentage
+const DAO_DISTRIBUTION_RATIO = 0.333; // Portion of buybacks distributed to DAO
 
 export interface ColsStakerRow {
   address: string;
@@ -36,6 +38,9 @@ export function useColsApr({ trigger }: { trigger: any }) {
   const [egldPrice, setEgldPrice] = useState<number>(0);
   const [colsPrice] = useState<number>(COLS_PRICE_USD);
   const [baseApr, setBaseApr] = useState<number>(BASE_APR_INPUT);
+
+  // Get agency service fee from global context
+  const { contractDetails } = useGlobalContext();
 
   // 1. Fetch COLS stakers and balances
   const fetchColsStakers = useCallback(async () => {
@@ -102,7 +107,21 @@ export function useColsApr({ trigger }: { trigger: any }) {
     // 4. Use constant base APR
     setBaseApr(BASE_APR_INPUT);
 
-    // 5. Build table
+    // 5. Parse agency service fee (e.g. "10%" -> 0.1)
+    let agencyServiceFee = 0.1; // fallback
+    if (
+      contractDetails &&
+      contractDetails.data &&
+      typeof contractDetails.data.serviceFee === 'string'
+    ) {
+      const feeStr = contractDetails.data.serviceFee.replace('%', '').trim();
+      const feeNum = parseFloat(feeStr);
+      if (!isNaN(feeNum)) {
+        agencyServiceFee = feeNum / 100;
+      }
+    }
+
+    // 6. Build table
     const table: ColsStakerRow[] = colsStakers.map(s => ({
       address: s.address,
       colsStaked: s.colsStaked,
@@ -115,7 +134,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
       rank: null
     }));
 
-    // 6. Calculate ratios
+    // 7. Calculate ratios
     for (const row of table) {
       if (row.egldStaked > 0) {
         row.ratio = (row.colsStaked * COLS_PRICE_USD) / (row.egldStaked * egldPrice);
@@ -123,7 +142,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.ratio = null;
       }
     }
-    // 7. Normalize
+    // 8. Normalize
     const validRatios = table.filter(r => r.ratio !== null).map(r => r.ratio!);
     const minRatio = Math.min(...validRatios);
     const maxRatio = Math.max(...validRatios);
@@ -134,7 +153,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.normalized = null;
       }
     }
-    // 8. APR(i)
+    // 9. APR(i)
     for (const row of table) {
       if (row.normalized !== null) {
         row.aprBonus = APRmin + (APRmax - APRmin) * Math.sqrt(row.normalized);
@@ -142,18 +161,18 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.aprBonus = null;
       }
     }
-    // 9. DAO(i) - Only for users with active eGLD staked
+    // 10. DAO(i) - Only for users with active eGLD staked
     const totalEgldStaked = table.reduce((sum, r) => sum + (r.egldStaked || 0), 0);
     const sumColsStaked = table.reduce((sum, r) => sum + (r.colsStaked || 0), 0);
     for (const row of table) {
       if (row.egldStaked > 0 && row.colsStaked > 0 && sumColsStaked > 0) {
-        // DAO(i) = Total-eGLD * RAW-APR * 0.1 * Agency-Buy-back * 0.333 * COLS-staked(i) ÷ SUM(COLS-staked(i)) ÷ eGLD-staked(i)
+        // DAO(i) = Total-eGLD * RAW-APR * serviceFee * Agency-Buy-back * DAO_DISTRIBUTION_RATIO * COLS-staked(i) ÷ SUM(COLS-staked(i)) ÷ eGLD-staked(i)
         const dao = (
           totalEgldStaked *
           RAW_APR *
-          0.1 *
+          agencyServiceFee *
           AGENCY_BUYBACK *
-          0.333 *
+          DAO_DISTRIBUTION_RATIO *
           row.colsStaked /
           sumColsStaked /
           row.egldStaked
@@ -163,7 +182,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.dao = null;
       }
     }
-    // 10. APR_TOTAL: Only for users with active eGLD staked, otherwise just base APR
+    // 11. APR_TOTAL: Only for users with active eGLD staked, otherwise just base APR
     for (const row of table) {
       if (row.egldStaked > 0) {
         row.aprTotal = BASE_APR_INPUT + (row.aprBonus || 0) + (row.dao || 0);
@@ -171,7 +190,7 @@ export function useColsApr({ trigger }: { trigger: any }) {
         row.aprTotal = BASE_APR_INPUT;
       }
     }
-    // 11. Ranking
+    // 12. Ranking
     const sorted = [...table].sort((a, b) => (b.aprTotal || 0) - (a.aprTotal || 0));
     for (let i = 0; i < sorted.length; ++i) {
       sorted[i].rank = i + 1;
@@ -183,13 +202,13 @@ export function useColsApr({ trigger }: { trigger: any }) {
     }
     setStakers(table);
     setLoading(false);
-  }, [fetchColsStakers, fetchEgldStaked, fetchEgldPrice]);
+  }, [fetchColsStakers, fetchEgldStaked, fetchEgldPrice, contractDetails]);
 
   // Recalculate on login, trigger, or user actions
   useEffect(() => {
     recalc();
     // eslint-disable-next-line
-  }, [trigger]);
+  }, [trigger, contractDetails]);
 
   return { loading, stakers, egldPrice, colsPrice, baseApr, recalc };
 }
